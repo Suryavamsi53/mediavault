@@ -10,14 +10,15 @@ import (
 	"github.com/go-ozzo/ozzo-routing/v2/content"
 	"github.com/go-ozzo/ozzo-routing/v2/cors"
 	_ "github.com/lib/pq"
-	"github.com/qiangxue/go-rest-api/internal/album"
-	"github.com/qiangxue/go-rest-api/internal/auth"
-	"github.com/qiangxue/go-rest-api/internal/config"
-	"github.com/qiangxue/go-rest-api/internal/errors"
-	"github.com/qiangxue/go-rest-api/internal/healthcheck"
-	"github.com/qiangxue/go-rest-api/pkg/accesslog"
-	"github.com/qiangxue/go-rest-api/pkg/dbcontext"
-	"github.com/qiangxue/go-rest-api/pkg/log"
+	"mediavault/internal/album"
+	"mediavault/internal/auth"
+	"mediavault/internal/config"
+	"mediavault/internal/errors"
+	"mediavault/internal/healthcheck"
+	"mediavault/internal/media"
+	"mediavault/pkg/accesslog"
+	"mediavault/pkg/dbcontext"
+	"mediavault/pkg/log"
 	"net/http"
 	"os"
 	"time"
@@ -77,13 +78,13 @@ func buildHandler(logger log.Logger, db *dbcontext.DB, cfg *config.Config) http.
 	router.Use(
 		accesslog.Handler(logger),
 		errors.Handler(logger),
-		content.TypeNegotiator(content.JSON),
 		cors.Handler(cors.AllowAll),
 	)
 
 	healthcheck.RegisterHandlers(router, Version)
 
 	rg := router.Group("/v1")
+	rg.Use(content.TypeNegotiator(content.JSON))
 
 	authHandler := auth.Handler(cfg.JWTSigningKey)
 
@@ -92,10 +93,26 @@ func buildHandler(logger log.Logger, db *dbcontext.DB, cfg *config.Config) http.
 		authHandler, logger,
 	)
 
-	auth.RegisterHandlers(rg.Group(""),
-		auth.NewService(cfg.JWTSigningKey, cfg.JWTExpiration, logger),
-		logger,
+	media.RegisterHandlers(rg.Group(""),
+		media.NewService(media.NewRepository(db, logger), logger),
+		authHandler, cfg.JWTSigningKey, logger,
 	)
+
+	auth.RegisterHandlers(rg.Group(""),
+		auth.NewService(db, cfg.JWTSigningKey, cfg.JWTExpiration, logger),
+		authHandler, logger,
+	)
+
+	// serve static frontend assets
+	fs := http.FileServer(http.Dir("./web"))
+	serveStatic := func(c *routing.Context) error {
+		fs.ServeHTTP(c.Response, c.Request)
+		return nil
+	}
+	router.Get("/", serveStatic)
+	router.Get("/index.html", serveStatic)
+	router.Get("/style.css", serveStatic)
+	router.Get("/app.js", serveStatic)
 
 	return router
 }

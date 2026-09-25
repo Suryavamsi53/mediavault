@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"github.com/qiangxue/go-rest-api/internal/entity"
-	"github.com/qiangxue/go-rest-api/pkg/log"
+	"mediavault/internal/entity"
+	"mediavault/pkg/log"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

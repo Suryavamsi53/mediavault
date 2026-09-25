@@ -1,9 +1,20 @@
 package entity
 
-// User represents a user.
+import (
+	"time"
+)
+
+// User represents a user account.
 type User struct {
-	ID   string
-	Name string
+	ID        string    `json:"id" db:"id"`
+	Name      string    `json:"username" db:"username"`
+	Password  string    `json:"-" db:"password"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
+}
+
+// TableName specifies the database table for User.
+func (User) TableName() string {
+	return "users"
 }
 
 // GetID returns the user ID.

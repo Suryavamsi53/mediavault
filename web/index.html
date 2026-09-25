@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediaVault - High-Performance Binary Media Streamer</title>
+  <meta name="description" content="Store, manage, preview, and stream binary images and videos backed by PostgreSQL BYTEA and Go REST API.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Ambient glowing background lights -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+  <div class="ambient-glow glow-3"></div>
+
+  <div class="app-wrapper">
+    <!-- Navigation / Header -->
+    <header class="navbar">
+      <div class="brand-group">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242M12 12v9m-4-4 4 4 4-4"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">MediaVault</h1>
+          <p class="brand-subtitle">PostgreSQL Binary Storage & Streamer</p>
+        </div>
+      </div>
+
+      <!-- Nav Actions (Status & User Profile) -->
+      <div class="nav-actions">
+        <div class="status-badge" id="serverStatusBadge">
+          <span class="status-dot" id="statusDot"></span>
+          <span id="statusText">Connecting...</span>
+        </div>
+
+        <div class="user-pill" id="userPill" style="display: none;">
+          <div class="user-avatar" id="userAvatar">U</div>
+          <span class="user-name" id="userNameDisplay">Username</span>
+          <button class="btn-logout" id="logoutBtn" title="Log out">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
+            </svg>
+          </button>
+        </div>
+
+        <button class="btn-primary" id="loginTriggerBtn" style="display: none;">
+          Sign In
+        </button>
+      </div>
+    </header>
+
+    <!-- Quick Stats Grid -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon-wrap">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+          </svg>
+        </div>
+        <div>
+          <div class="stat-val" id="statTotal">0</div>
+          <div class="stat-lbl">Total Files</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon-wrap">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <polyline points="21 15 16 10 5 21"/>
+          </svg>
+        </div>
+        <div>
+          <div class="stat-val" id="statImages">0</div>
+          <div class="stat-lbl">Images</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon-wrap">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="23 7 16 12 23 17 23 7"/>
+            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+          </svg>
+        </div>
+        <div>
+          <div class="stat-val" id="statVideos">0</div>
+          <div class="stat-lbl">Videos</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon-wrap">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+            <line x1="12" y1="22.08" x2="12" y2="12"/>
+          </svg>
+        </div>
+        <div>
+          <div class="stat-val" id="statStorage">0 MB</div>
+          <div class="stat-lbl">Storage Used</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Drag & Drop Upload Zone -->
+    <section>
+      <div class="upload-container" id="uploadDropzone">
+        <input type="file" id="fileInput" accept="image/*,video/*" multiple style="display: none;">
+        <div class="upload-icon-circle">
+          <svg viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+        </div>
+        <h2 class="upload-title">Drop your images or videos here</h2>
+        <p class="upload-subtitle">or click anywhere to select one or multiple files</p>
+        <span class="upload-hint">Supports JPG, PNG, GIF, WebP, MP4, WebM (Max 25 MB per file)</span>
+
+        <!-- Live Progress -->
+        <div class="upload-progress-box" id="uploadProgressBox">
+          <div class="progress-header">
+            <span id="uploadFileName">Uploading file...</span>
+            <span id="uploadPercent">0%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="uploadProgressFill"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Toolbar Filters & Search -->
+    <div class="toolbar">
+      <div class="filter-tabs" id="filterTabs">
+        <button class="tab-btn active" data-filter="all" id="tabFilterAll">All Media</button>
+        <button class="tab-btn" data-filter="images" id="tabFilterImages">Images</button>
+        <button class="tab-btn" data-filter="videos" id="tabFilterVideos">Videos</button>
+      </div>
+
+      <div class="search-box">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="text" id="searchInput" class="search-input" placeholder="Search by file name...">
+      </div>
+    </div>
+
+    <!-- Media Cards Grid -->
+    <main>
+      <div class="media-grid" id="mediaGrid">
+        <!-- Rendered dynamically by app.js -->
+      </div>
+    </main>
+  </div>
+
+  <!-- Media Lightbox / Theatre Modal -->
+  <div class="modal-overlay" id="mediaModal" data-lenis-prevent>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle">File Name</h3>
+        <button class="modal-close-btn" id="modalCloseBtn" aria-label="Close modal">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="6"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body" id="modalMediaContainer">
+        <!-- Dynamic Image or Video tag inserted here -->
+      </div>
+      <div class="modal-footer">
+        <div class="modal-footer-meta">
+          <span id="modalFileSize">0 KB</span>
+          <span>•</span>
+          <span id="modalFileType">image/png</span>
+        </div>
+        <div class="modal-footer-actions">
+          <button class="btn-action" id="modalCopyBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
+            Copy Stream URL
+          </button>
+          <a class="btn-primary" id="modalDownloadBtn" download>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Download
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Auth Modal (Login / Register) -->
+  <div class="modal-overlay" id="authModal" data-lenis-prevent>
+    <div class="modal-content auth-modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="authModalTitle">Welcome to MediaVault</h3>
+      </div>
+      <div class="auth-modal-body">
+        <div class="filter-tabs auth-tabs">
+          <button class="tab-btn active" id="tabAuthLogin" type="button">Sign In</button>
+          <button class="tab-btn" id="tabAuthRegister" type="button">Create Account</button>
+        </div>
+
+        <form id="authForm" class="auth-form">
+          <div class="form-group">
+            <label for="authUsername" class="form-label">Username</label>
+            <input type="text" id="authUsername" class="form-input" placeholder="Enter username" required autocomplete="username">
+          </div>
+          <div class="form-group">
+            <label for="authPassword" class="form-label">Password</label>
+            <input type="password" id="authPassword" class="form-input" placeholder="Enter password" required autocomplete="current-password">
+          </div>
+
+          <div class="auth-error-msg" id="authErrorMsg"></div>
+
+          <button type="submit" class="btn-primary auth-submit-btn" id="authSubmitBtn">
+            Sign In to My Vault
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Scroll-to-Top Button -->
+  <button class="scroll-top-btn" id="scrollTopBtn" title="Scroll to top" aria-label="Scroll to top">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="lenis.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

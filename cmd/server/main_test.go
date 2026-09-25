@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/qiangxue/go-rest-api/pkg/log"
+	"mediavault/pkg/log"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"

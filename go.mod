@@ -1,4 +1,4 @@
-module github.com/qiangxue/go-rest-api
+module mediavault
 
 go 1.13
 

@@ -1,16 +1,13 @@
-# Go RESTful API Starter Kit (Boilerplate)
+# MediaVault - PostgreSQL Binary Media Storage & Streamer
 
-[![GoDoc](https://godoc.org/github.com/qiangxue/go-rest-api?status.png)](http://godoc.org/github.com/qiangxue/go-rest-api)
-[![Build Status](https://github.com/qiangxue/go-rest-api/workflows/build/badge.svg)](https://github.com/qiangxue/go-rest-api/actions?query=workflow%3Abuild)
-[![Code Coverage](https://codecov.io/gh/qiangxue/go-rest-api/branch/master/graph/badge.svg)](https://codecov.io/gh/qiangxue/go-rest-api)
-[![Go Report](https://goreportcard.com/badge/github.com/qiangxue/go-rest-api)](https://goreportcard.com/report/github.com/qiangxue/go-rest-api)
+MediaVault is a full-stack media streaming and management application built with Go, PostgreSQL (`BYTEA`), and a modern Vanilla HTML/CSS/JS frontend.
 
-This starter kit is designed to get you up and running with a project structure optimized for developing
-RESTful API services in Go. It promotes the best practices that follow the [SOLID principles](https://en.wikipedia.org/wiki/SOLID)
-and [clean architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html). 
-It encourages writing clean and idiomatic Go code. 
-
-The kit provides the following features right out of the box:
+### Features
+* **Direct Binary Storage**: Stores image and video files directly in PostgreSQL using `BYTEA`.
+* **Range-Seeking Media Streaming**: Native streaming via `http.ServeContent` with `Accept-Ranges: bytes` support for smooth video playback and scrubbing.
+* **Modern Glassmorphic Web UI**: Drag-and-drop batch upload, real-time upload progress, live search, type filtering, and an immersive theatre modal.
+* **OWASP Media Security**: Filename sanitization, file extension whitelist, magic-byte sniffing verification, and sandboxed CSP response headers.
+* **RESTful API**: Clean architecture following SOLID principles.
 
 * RESTful endpoints in the widely accepted format
 * Standard CRUD operations of a database table

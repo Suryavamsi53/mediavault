@@ -1,10 +1,10 @@
 package album
 
 import (
-	"github.com/qiangxue/go-rest-api/internal/auth"
-	"github.com/qiangxue/go-rest-api/internal/entity"
-	"github.com/qiangxue/go-rest-api/internal/test"
-	"github.com/qiangxue/go-rest-api/pkg/log"
+	"mediavault/internal/auth"
+	"mediavault/internal/entity"
+	"mediavault/internal/test"
+	"mediavault/pkg/log"
 	"net/http"
 	"testing"
 	"time"

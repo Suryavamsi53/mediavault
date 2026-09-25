@@ -1,2 +1,4 @@
-dsn: "postgres://127.0.0.1/go_restful?sslmode=disable&user=postgres&password=postgres"
+dsn: "postgres://postgres:postgres@127.0.0.1:5432/go_restful?sslmode=disable"
 jwt_signing_key: "LxsKJywDL5O5PvgODZhBH12KE6k2yL8E"
+
+
